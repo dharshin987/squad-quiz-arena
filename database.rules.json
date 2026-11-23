@@ -1,0 +1,133 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "admins": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "moderators": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "profiles": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true || (!newData.exists() && auth.uid === $uid))",
+        ".validate": "newData.hasChildren(['displayName', 'username']) && newData.child('displayName').isString() && newData.child('displayName').val().length <= 24 && newData.child('username').isString() && newData.child('username').val().matches(/^[a-z0-9_]{3,20}$/) && !newData.child('role').exists() && !newData.child('password').exists() && !newData.child('passwordHash').exists() && !newData.child('email').exists()"
+      }
+    },
+    "scores": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true || (!newData.exists() && auth.uid === $uid))",
+        ".validate": "newData.hasChildren(['points']) && newData.child('points').isNumber() && newData.child('points').val() >= 0 && newData.child('points').val() <= 1000000 && newData.child('streak').isNumber() && newData.child('bestStreak').isNumber()"
+      }
+    },
+    "playerData": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)"
+      }
+    },
+    "chat": {
+      ".read": "auth != null",
+      "$messageId": {
+        ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('from').val() === auth.uid) || root.child('admins').child(auth.uid).val() === true)",
+        ".validate": "newData.hasChildren(['id', 'from', 'text', 'at']) && newData.child('id').val() === $messageId && newData.child('text').isString() && newData.child('text').val().length <= 300 && newData.child('at').isNumber()"
+      }
+    },
+    "dms": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$messageId": {
+          ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+          ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && data.child('to').val() === auth.uid && newData.child('from').val() === data.child('from').val() && newData.child('to').val() === data.child('to').val() && newData.child('text').val() === data.child('text').val() && newData.child('at').val() === data.child('at').val()))) || (!data.exists() && newData.child('from').val() === auth.uid && newData.child('to').val() === $uid) || (!newData.exists() && data.exists() && (data.child('from').val() === auth.uid || data.child('to').val() === auth.uid)))",
+          ".validate": "newData.hasChildren(['id', 'from', 'to', 'text', 'at']) && newData.child('id').val() === $messageId && newData.child('text').isString() && newData.child('text').val().length <= 500 && newData.child('at').isNumber()"
+        }
+      }
+    },
+    "challenges": {
+      ".read": "auth != null",
+      "$challengeId": {
+        ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && ((!data.exists() && newData.child('from').val() === auth.uid) || data.child('from').val() === auth.uid || data.child('to').val() === auth.uid || root.child('admins').child(auth.uid).val() === true)",
+        ".validate": "newData.hasChildren(['id', 'from', 'to', 'status']) && newData.child('id').val() === $challengeId && (!data.exists() || (newData.child('from').val() === data.child('from').val() && newData.child('to').val() === data.child('to').val()))"
+      }
+    },
+    "questions": {
+      ".read": "auth != null",
+      "$questionId": {
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('moderators').child(auth.uid).val() === true)"
+      }
+    },
+    "notices": {
+      ".read": "auth != null",
+      "$noticeId": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "settings": {
+      ".read": "auth != null",
+      "$key": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "moderation": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "accounts": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)"
+        }
+      }
+    },
+    "supportRequests": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$requestId": {
+          ".write": "auth != null && ((auth.uid === $uid && newData.child('userId').val() === auth.uid) || root.child('admins').child(auth.uid).val() === true || (!newData.exists() && auth.uid === $uid))",
+          ".validate": "newData.hasChildren(['id', 'userId', 'message', 'at']) && newData.child('id').val() === $requestId && newData.child('message').isString() && newData.child('message').val().length <= 700 && newData.child('at').isNumber()"
+        }
+      }
+    },
+    "antiCheatAlerts": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$alertId": {
+          ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && ((auth.uid === $uid && ((!data.exists() && newData.child('player').val() === auth.uid) || (!newData.exists() && data.child('player').val() === auth.uid))) || root.child('admins').child(auth.uid).val() === true)",
+          ".validate": "newData.hasChildren(['id', 'player', 'at', 'count']) && newData.child('id').val() === $alertId && newData.child('count').isNumber()"
+        }
+      }
+    },
+    "noticeReads": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$noticeId": {
+          ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+          ".validate": "newData.hasChildren(['read']) && newData.child('read').val() === true && (!newData.child('acknowledged').exists() || newData.child('acknowledged').val() === true)"
+        }
+      }
+    },
+    "logs": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$category": {
+          "$logId": {
+            ".write": "auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)"
+          }
+        }
+      }
+    }
+  }
+}
